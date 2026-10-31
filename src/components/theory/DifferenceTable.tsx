@@ -20,18 +20,19 @@ export const DifferenceTable: React.FC<DifferenceTableProps> = ({ tables }) => {
   );
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+    <div className="bg-white p-4 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-5 sm:space-y-6">
       {/* Table Selector Pills */}
       <div>
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <h3 className="font-heading font-bold text-xl text-slate-900 flex items-center gap-2">
-            <ArrowLeftRight className="w-5 h-5 text-blue-600" />
-            महत्वपूर्ण अंतर तुलनात्मक सारणियाँ (Important Differences)
+        <div className="flex items-center justify-between gap-2 mb-2.5">
+          <h3 className="font-heading font-bold text-base sm:text-xl text-slate-900 flex items-center gap-1.5">
+            <ArrowLeftRight className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            महत्वपूर्ण अंतर सारणियाँ (Differences)
           </h3>
-          <span className="text-xs text-slate-500 hidden sm:inline">कुल 8 सारणियाँ</span>
+          <span className="text-[11px] text-slate-500 hidden sm:inline">कुल 8 सारणियाँ</span>
         </div>
 
-        <div className="flex flex-wrap gap-2 pb-2">
+        {/* Scrollable on mobile */}
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 touch-pan-x sm:flex-wrap">
           {tables.map((t) => (
             <button
               key={t.id}
@@ -39,7 +40,7 @@ export const DifferenceTable: React.FC<DifferenceTableProps> = ({ tables }) => {
                 setSelectedTableId(t.id);
                 setSearchTerm('');
               }}
-              className={`text-xs px-3 py-1.5 rounded-xl font-medium transition ${
+              className={`text-xs px-2.5 sm:px-3 py-1.5 rounded-xl font-medium transition shrink-0 ${
                 selectedTableId === t.id
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -52,38 +53,43 @@ export const DifferenceTable: React.FC<DifferenceTableProps> = ({ tables }) => {
       </div>
 
       {/* Active Table Presentation */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-slate-50 p-3.5 sm:p-4 rounded-xl border border-slate-200">
           <div>
-            <h4 className="font-heading font-bold text-lg text-slate-900">
+            <h4 className="font-heading font-bold text-sm sm:text-lg text-slate-900">
               {activeTable.titleHi}
             </h4>
-            <div className="text-xs text-slate-500">{activeTable.titleEn}</div>
+            <div className="text-[11px] sm:text-xs text-slate-500">{activeTable.titleEn}</div>
           </div>
 
-          {/* Search inside table */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="आधार या विवरण खोजें..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 w-full sm:w-56"
-            />
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-medium sm:hidden">
+              👉 दाएँ-बाएँ स्वाइप करें
+            </span>
+            {/* Search inside table */}
+            <div className="relative w-full sm:w-auto">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+              <input
+                type="text"
+                placeholder="खोजें..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 pr-2.5 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 w-full sm:w-52"
+              />
+            </div>
           </div>
         </div>
 
-        {/* The Comparison Table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-left text-sm">
+        {/* The Comparison Table with horizontal swipe on mobile */}
+        <div className="overflow-x-auto rounded-xl border border-slate-200 touch-pan-x">
+          <table className="w-full text-left text-xs sm:text-sm min-w-[520px]">
             <thead className="bg-slate-100 text-slate-800 font-bold border-b border-slate-200">
               <tr>
-                <th className="py-3.5 px-4 w-1/4">तुलना का आधार (Basis)</th>
-                <th className="py-3.5 px-4 w-3/8 text-blue-900 bg-blue-50/50">
+                <th className="py-2.5 px-3 sm:px-4 w-1/4">आधार (Basis)</th>
+                <th className="py-2.5 px-3 sm:px-4 w-3/8 text-blue-900 bg-blue-50/50">
                   {activeTable.subject1}
                 </th>
-                <th className="py-3.5 px-4 w-3/8 text-indigo-900 bg-indigo-50/50">
+                <th className="py-2.5 px-3 sm:px-4 w-3/8 text-indigo-900 bg-indigo-50/50">
                   {activeTable.subject2}
                 </th>
               </tr>
@@ -92,20 +98,20 @@ export const DifferenceTable: React.FC<DifferenceTableProps> = ({ tables }) => {
               {filteredRows && filteredRows.length > 0 ? (
                 filteredRows.map((row, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-slate-900 text-xs md:text-sm">
+                    <td className="py-3 px-3 sm:px-4 font-semibold text-slate-900 text-xs">
                       {row.basis}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-700 text-xs md:text-sm bg-blue-50/20 leading-relaxed">
+                    <td className="py-3 px-3 sm:px-4 text-slate-700 text-xs bg-blue-50/20 leading-relaxed">
                       {row.val1}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-700 text-xs md:text-sm bg-indigo-50/20 leading-relaxed">
+                    <td className="py-3 px-3 sm:px-4 text-slate-700 text-xs bg-indigo-50/20 leading-relaxed">
                       {row.val2}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} className="py-8 text-center text-xs text-slate-400">
+                  <td colSpan={3} className="py-6 text-center text-xs text-slate-400">
                     कोई मेल नहीं मिला।
                   </td>
                 </tr>
