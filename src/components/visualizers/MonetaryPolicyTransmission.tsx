@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { Sliders, ArrowRight, TrendingUp, TrendingDown, ShieldAlert, CheckCircle2, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sliders, ArrowRight, TrendingUp, TrendingDown, ShieldAlert, CheckCircle2, RotateCcw, Play, Pause, Radio, Zap } from 'lucide-react';
+import { playCyberClick, playHologramFlip } from '../../utils/cyberAudio';
 
 export const MonetaryPolicyTransmission: React.FC = () => {
   const [scenario, setScenario] = useState<'inflation' | 'deflation'>('inflation');
   const [activeStep, setActiveStep] = useState<number>(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
 
   const stepsInflation = [
     {
@@ -73,72 +75,118 @@ export const MonetaryPolicyTransmission: React.FC = () => {
 
   const currentSteps = scenario === 'inflation' ? stepsInflation : stepsDeflation;
 
+  // Auto-play animation through stages
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval>;
+    if (isAutoPlaying) {
+      timer = setInterval(() => {
+        setActiveStep((prev) => {
+          playCyberClick();
+          if (prev < currentSteps.length - 1) {
+            return prev + 1;
+          } else {
+            setIsAutoPlaying(false);
+            return 0;
+          }
+        });
+      }, 2000);
+    }
+    return () => clearInterval(timer);
+  }, [isAutoPlaying, currentSteps.length]);
+
   return (
-    <div className="bg-white p-4 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-5 sm:space-y-6">
+    <div className="bg-slate-900/90 backdrop-blur-2xl p-4 sm:p-8 rounded-3xl border border-cyan-500/30 shadow-2xl shadow-cyan-950/40 space-y-5 sm:space-y-6 text-white relative overflow-hidden">
+      {/* Background glow */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+
       {/* Header with Scenario Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-500/20 pb-4 relative z-10">
         <div>
-          <span className="text-[10px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider">
-            नीतिगत संचरण प्रणाली
+          <span className="text-[10px] sm:text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+            <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+            [ POLICY_TRANSMISSION_HUD ]
           </span>
-          <h3 className="font-heading font-bold text-lg sm:text-2xl text-slate-900 mt-0.5">
+          <h3 className="font-heading font-extrabold text-lg sm:text-2xl text-white mt-0.5">
             मौद्रिक नीति संचरण तंत्र (Policy Transmission)
           </h3>
-          <p className="text-[11px] sm:text-sm text-slate-500 mt-0.5">
+          <p className="text-[11px] sm:text-sm text-cyan-200/70 mt-0.5 font-mono">
             देखें कि RBI के एक दर बदलाव का अर्थव्यवस्था के हर स्तर पर क्या प्रभाव पड़ता है
           </p>
         </div>
 
-        {/* Toggle Pills */}
-        <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl self-start sm:self-auto border border-slate-200">
+        {/* Toggle Pills & Auto-Play */}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-2xl border border-cyan-500/30">
+            <button
+              onClick={() => {
+                playCyberClick();
+                setScenario('inflation');
+                setActiveStep(0);
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                scenario === 'inflation'
+                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 border border-rose-400'
+                  : 'text-slate-400 hover:text-rose-300'
+              }`}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" /> महंगाई (Inflation)
+            </button>
+            <button
+              onClick={() => {
+                playCyberClick();
+                setScenario('deflation');
+                setActiveStep(0);
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                scenario === 'deflation'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 border border-emerald-400'
+                  : 'text-slate-400 hover:text-emerald-300'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" /> मंदी (Deflation)
+            </button>
+          </div>
+
+          {/* Auto-Play Beam Button */}
           <button
             onClick={() => {
-              setScenario('inflation');
-              setActiveStep(0);
+              playCyberClick();
+              setIsAutoPlaying(!isAutoPlaying);
             }}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-              scenario === 'inflation'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border ${
+              isAutoPlaying
+                ? 'bg-amber-500 text-black border-amber-300 animate-pulse'
+                : 'bg-cyan-950 text-cyan-300 border-cyan-500/30 hover:bg-cyan-900'
             }`}
           >
-            <ShieldAlert className="w-3.5 h-3.5" /> महंगाई (Inflation)
-          </button>
-          <button
-            onClick={() => {
-              setScenario('deflation');
-              setActiveStep(0);
-            }}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-              scenario === 'deflation'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <TrendingUp className="w-3.5 h-3.5" /> मंदी (Deflation)
+            {isAutoPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            <span>{isAutoPlaying ? 'वेव रोकें' : '⚡ ऑटो संचरण वेव'}</span>
           </button>
         </div>
       </div>
 
-      {/* Stepper Navigation - Horizontal swipe on mobile */}
-      <div className="flex overflow-x-auto gap-2 scrollbar-none pb-1 touch-pan-x sm:grid sm:grid-cols-5">
+      {/* Stepper Navigation */}
+      <div className="flex overflow-x-auto gap-2 scrollbar-none pb-1 touch-pan-x sm:grid sm:grid-cols-5 relative z-10">
         {currentSteps.map((s, index) => {
           const isDone = index <= activeStep;
           const isCurrent = index === activeStep;
           return (
             <button
               key={index}
-              onClick={() => setActiveStep(index)}
-              className={`p-2.5 rounded-xl text-left transition border shrink-0 min-w-[105px] sm:min-w-0 ${
+              onClick={() => {
+                playCyberClick();
+                setActiveStep(index);
+              }}
+              className={`p-3 rounded-2xl text-left transition border shrink-0 min-w-[110px] sm:min-w-0 cursor-pointer ${
                 isCurrent
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                  ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white border-cyan-400 shadow-xl shadow-cyan-600/30 ring-2 ring-cyan-400/50 scale-[1.02]'
                   : isDone
-                  ? 'bg-blue-50 text-blue-900 border-blue-200'
-                  : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-slate-950 text-cyan-300 border-cyan-500/30'
+                  : 'bg-slate-950/60 text-slate-500 border-slate-800 hover:border-cyan-500/30 hover:text-slate-300'
               }`}
             >
-              <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider opacity-80">
-                चरण {index + 1}
+              <div className="text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest opacity-80">
+                PHASE {index + 1}
               </div>
               <div className="text-xs font-bold truncate mt-0.5">
                 {index === 0 ? 'RBI कदम' : index === 1 ? 'बैंक दरें' : index === 2 ? 'ऋण मांग' : index === 3 ? 'समग्र मांग' : 'अंतिम असर'}
@@ -149,40 +197,46 @@ export const MonetaryPolicyTransmission: React.FC = () => {
       </div>
 
       {/* Highlighted Step Card */}
-      <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/50 border border-slate-200 shadow-sm space-y-3 sm:space-y-4">
+      <div className="p-5 sm:p-7 rounded-2xl bg-slate-950/90 border border-cyan-500/40 shadow-xl space-y-4 relative z-10">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] sm:text-xs font-bold text-blue-700 uppercase tracking-wider bg-blue-100 px-2.5 py-0.5 rounded-full">
+          <span className="text-[10px] sm:text-xs font-mono font-bold text-cyan-300 uppercase tracking-widest bg-cyan-950 px-3 py-1 rounded-full border border-cyan-500/40">
             {currentSteps[activeStep].stage}
           </span>
-          <div className="text-xs text-slate-500">
-            {activeStep + 1} / 5
+          <div className="text-xs font-mono text-cyan-400">
+            [ STAGE {activeStep + 1} OF 5 ]
           </div>
         </div>
 
-        <h4 className="font-heading font-extrabold text-base sm:text-xl text-slate-900 leading-snug">
+        <h4 className="font-heading font-extrabold text-lg sm:text-2xl text-white leading-snug">
           {currentSteps[activeStep].title}
         </h4>
 
-        <p className="text-xs sm:text-base text-slate-700 leading-relaxed">
+        <p className="text-xs sm:text-base text-slate-300 leading-relaxed font-normal">
           {currentSteps[activeStep].detail}
         </p>
 
         {/* Navigation Buttons inside card */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
+        <div className="flex items-center justify-between pt-3 border-t border-cyan-500/20">
           <button
-            onClick={() => setActiveStep((prev) => Math.max(0, prev - 1))}
+            onClick={() => {
+              playCyberClick();
+              setActiveStep((prev) => Math.max(0, prev - 1));
+            }}
             disabled={activeStep === 0}
-            className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 disabled:opacity-40 transition"
+            className="px-3.5 py-2 rounded-xl text-xs font-mono font-medium bg-slate-900 text-slate-300 border border-slate-700 hover:border-cyan-500/40 disabled:opacity-30 transition cursor-pointer"
           >
-            ⏮ पिछला
+            ⏮ पिछला चरण
           </button>
 
           <button
-            onClick={() => setActiveStep((prev) => Math.min(currentSteps.length - 1, prev + 1))}
+            onClick={() => {
+              playCyberClick();
+              setActiveStep((prev) => Math.min(currentSteps.length - 1, prev + 1));
+            }}
             disabled={activeStep === currentSteps.length - 1}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 shadow-sm transition inline-flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-cyan-600 to-indigo-600 text-white hover:from-cyan-500 hover:to-indigo-500 disabled:opacity-30 shadow-md shadow-cyan-600/30 transition inline-flex items-center gap-1.5 cursor-pointer border border-cyan-400/40"
           >
-            अगला ⏭
+            अगला चरण ⏭
           </button>
         </div>
       </div>

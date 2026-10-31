@@ -338,6 +338,54 @@ export const CreditCreationSimulator: React.FC<CreditCreationSimulatorProps> = (
             </div>
           )}
 
+          {/* Animated Credit Expansion Spectrum Bars */}
+          <div className="col-span-2 md:col-span-4 bg-slate-950/80 p-4 sm:p-5 rounded-2xl border border-cyan-500/30 space-y-3 font-mono">
+            <div className="flex items-center justify-between text-xs font-bold text-cyan-300">
+              <span className="flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span>लाइव साख विस्तार स्पेक्ट्रम [DYNAMIC_SPECTRUM]</span>
+              </span>
+              <span className="text-[10px] text-cyan-400/80 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500/30">
+                k = {primaryResult.multiplier}× MULTIPLIER
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <div>
+                <div className="flex justify-between text-[11px] mb-1">
+                  <span className="text-slate-400">प्राथमिक नकद जमा (Base):</span>
+                  <span className="text-cyan-300 font-bold">₹{initialDeposit.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-cyan-500/20">
+                  <div className="bg-cyan-500 h-full rounded-full transition-all duration-500" style={{ width: '20%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[11px] mb-1">
+                  <span className="text-slate-400">विधिक आरक्षित निधि (LRR {lrr}%):</span>
+                  <span className="text-amber-300 font-bold">₹{primaryResult.totalReserves.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-amber-500/20">
+                  <div className="bg-amber-400 h-full rounded-full transition-all duration-500" style={{ width: '20%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[11px] mb-1">
+                  <span className="text-slate-400">कुल साख जमा सृजन ({primaryResult.multiplier}× विस्तार):</span>
+                  <span className="text-emerald-400 font-bold">₹{primaryResult.totalDeposits.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-emerald-500/30">
+                  <div
+                    className="bg-gradient-to-r from-cyan-400 via-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-700 shadow-md shadow-emerald-500/50"
+                    style={{ width: `${Math.min(100, (primaryResult.multiplier / 20) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Interactive Stepper Control Bar */}
           <div className="col-span-2 md:col-span-4 bg-slate-900/90 p-3 sm:p-4 rounded-2xl border border-cyan-500/30 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-2.5">
             <div className="flex items-center gap-1.5 w-full sm:w-auto">

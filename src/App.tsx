@@ -58,8 +58,16 @@ import {
   Terminal,
   ShieldCheck,
   Activity,
-  ScanLine
+  ScanLine,
+  Compass
 } from 'lucide-react';
+
+const TICKER_MESSAGES = [
+  'CBSE Class 12 समष्टि अर्थशास्त्र • Unit 2',
+  '100/100 NCERT बोर्ड परीक्षा स्कोर बूस्टर',
+  'अत्याधुनिक AI ऑडियो सिमुलेटर प्रयोगशाला',
+  '3D फ्लिप कार्ड्स व 20 बोर्ड क्विज मैट्रिक्स'
+];
 
 export const App: React.FC = () => {
   const [currentChapterId, setCurrentChapterId] = useState<string>('money-and-banking');
@@ -72,6 +80,12 @@ export const App: React.FC = () => {
   // Mandatory welcome dialog modal (Mukhtar Cyber Terminal)
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState<boolean>(true);
 
+  // Dynamic cycling ticker index for hero animation
+  const [tickerIndex, setTickerIndex] = useState<number>(0);
+
+  // Animated numeric counter state
+  const [counts, setCounts] = useState({ sec: 0, mcq: 0, diff: 0, ncert: 0 });
+
   // Global Text-to-Speech hook
   const speech = useSpeech();
 
@@ -79,13 +93,37 @@ export const App: React.FC = () => {
     setVisitedTabs(prev => new Set([...prev, activeTab]));
   }, [activeTab]);
 
+  // Animated ticker cycle
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTickerIndex((prev) => (prev + 1) % TICKER_MESSAGES.length);
+    }, 3200);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Animated numbers counter
+  useEffect(() => {
+    let c = 0;
+    const interval = setInterval(() => {
+      c += 1;
+      setCounts({
+        sec: Math.min(9, Math.round(c * 0.9)),
+        mcq: Math.min(20, Math.round(c * 2)),
+        diff: Math.min(8, Math.round(c * 0.8)),
+        ncert: Math.min(100, Math.round(c * 10))
+      });
+      if (c >= 10) clearInterval(interval);
+    }, 45);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleDismissModal = () => {
     playAccessGranted();
     setIsWelcomeModalOpen(false);
     try {
       confetti({
-        particleCount: 80,
-        spread: 80,
+        particleCount: 90,
+        spread: 90,
         origin: { y: 0.6 },
         colors: ['#06b6d4', '#8b5cf6', '#ec4899', '#10b981', '#3b82f6']
       });
@@ -199,23 +237,25 @@ export const App: React.FC = () => {
       <TabNavigation activeTab={activeTab} onSelectTab={setActiveTab} />
 
       {/* ========================================================= */}
-      {/* FUTURISTIC SCI-FI HERO COCKPIT                            */}
+      {/* FUTURISTIC SCI-FI HERO COCKPIT WITH ANIMATED TICKER       */}
       {/* ========================================================= */}
       <div className="relative py-8 sm:py-12 px-3 sm:px-6 lg:px-8 border-b border-cyan-500/20 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900/90 to-slate-950">
-        {/* Radar Scanner Background Circle */}
+        {/* Animated Radar Scanner Background Circle */}
         <div className="absolute right-10 top-1/2 -translate-y-1/2 w-80 h-80 rounded-full border border-cyan-500/10 pointer-events-none hidden md:block">
-          <div className="absolute inset-8 rounded-full border border-dashed border-cyan-500/20 animate-spin-slow" />
-          <div className="absolute inset-16 rounded-full border border-purple-500/20 animate-spin-reverse" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-transparent rounded-full animate-spin" style={{ animationDuration: '6s' }} />
+          <div className="absolute inset-8 rounded-full border border-dashed border-cyan-500/25 animate-spin-slow" />
+          <div className="absolute inset-16 rounded-full border border-purple-500/25 animate-spin-reverse" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 to-transparent rounded-full animate-spin" style={{ animationDuration: '6s' }} />
         </div>
 
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-3.5 max-w-3xl">
-            {/* System Status Ticker */}
+            {/* Dynamic Animated System Status Ticker */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-[10px] sm:text-xs font-mono font-bold tracking-wider">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-[10px] sm:text-xs font-mono font-bold tracking-wider animate-in fade-in duration-300">
                 <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                CBSE Class 12 समष्टि अर्थशास्त्र • Unit 2
+                <span key={tickerIndex} className="animate-in fade-in duration-300">
+                  {TICKER_MESSAGES[tickerIndex]}
+                </span>
               </span>
 
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[10px] sm:text-xs font-mono font-bold">
@@ -235,7 +275,7 @@ export const App: React.FC = () => {
               {currentChapter.descriptionHi}
             </p>
 
-            {/* Quick Actions & Mukhtar Creator Badge */}
+            {/* Quick Actions & Mukhtar Creator Badge with Laser Border */}
             <div className="pt-2 flex flex-wrap items-center gap-3">
               {/* Quick 2-Minute Audio Overview Button */}
               <button
@@ -254,30 +294,47 @@ export const App: React.FC = () => {
                 </span>
               </button>
 
-              {/* Mukhtar Creator Holographic Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-cyan-500/30 text-xs font-mono text-cyan-200 shadow-md">
-                <Sparkles className="w-4 h-4 text-amber-300 animate-spin" style={{ animationDuration: '6s' }} />
-                <span>निर्माता: <strong className="text-white font-extrabold text-amber-300">मुख्तार (Mukhtar)</strong></span>
+              {/* Mukhtar Creator Holographic Badge with Continuous Laser Shine */}
+              <div className="relative p-[1.5px] rounded-2xl laser-border shadow-xl">
+                <div className="px-3.5 py-2 rounded-2xl bg-slate-950/95 backdrop-blur-md text-xs font-mono text-cyan-200 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-300 animate-spin" style={{ animationDuration: '6s' }} />
+                  <span>निर्माता: <strong className="text-white font-extrabold text-amber-300">मुख्तार (Mukhtar)</strong></span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Futuristic HUD Stats Matrix */}
+          {/* Futuristic Floating HUD Stats Matrix with Live Animated Counters */}
           <div className="grid grid-cols-4 md:grid-cols-2 gap-2.5 sm:gap-3.5 shrink-0">
-            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-cyan-500/30 text-center shadow-lg hover:border-cyan-400 transition group">
-              <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-400 group-hover:scale-105 transition-transform">9</div>
+            {/* Stat 1 - Floating Slow */}
+            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-cyan-500/30 text-center shadow-lg hover:border-cyan-400 transition animate-float-slow">
+              <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-400">
+                {counts.sec}
+              </div>
               <div className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase tracking-wider truncate">थ्योरी खंड</div>
             </div>
-            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-emerald-500/30 text-center shadow-lg hover:border-emerald-400 transition group">
-              <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-400 group-hover:scale-105 transition-transform">20+</div>
+
+            {/* Stat 2 - Floating Reverse */}
+            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-emerald-500/30 text-center shadow-lg hover:border-emerald-400 transition animate-float-reverse">
+              <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-400">
+                {counts.mcq}+
+              </div>
               <div className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase tracking-wider truncate">बोर्ड MCQs</div>
             </div>
-            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-purple-500/30 text-center shadow-lg hover:border-purple-400 transition group">
-              <div className="text-2xl sm:text-3xl font-black font-mono text-purple-400 group-hover:scale-105 transition-transform">8</div>
+
+            {/* Stat 3 - Floating Slow */}
+            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-purple-500/30 text-center shadow-lg hover:border-purple-400 transition animate-float-slow">
+              <div className="text-2xl sm:text-3xl font-black font-mono text-purple-400">
+                {counts.diff}
+              </div>
               <div className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase tracking-wider truncate">अंतर सारणियाँ</div>
             </div>
-            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-pink-500/30 text-center shadow-lg hover:border-pink-400 transition group">
-              <div className="text-2xl sm:text-3xl font-black font-mono text-pink-400 group-hover:scale-105 transition-transform">100%</div>
+
+            {/* Stat 4 - Floating Reverse */}
+            <div className="p-3 sm:p-4 bg-slate-900/90 rounded-2xl backdrop-blur-xl border border-pink-500/30 text-center shadow-lg hover:border-pink-400 transition animate-float-reverse">
+              <div className="text-2xl sm:text-3xl font-black font-mono text-pink-400">
+                {counts.ncert}%
+              </div>
               <div className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase tracking-wider truncate">NCERT हल</div>
             </div>
           </div>
@@ -320,155 +377,160 @@ export const App: React.FC = () => {
       </div>
 
       {/* ========================================================= */}
-      {/* MAIN DYNAMIC CONTENT AREA (CYBER THEMED)                 */}
+      {/* MAIN DYNAMIC CONTENT AREA WITH SMOOTH TAB TRANSITIONS    */}
       {/* ========================================================= */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 relative z-10">
-        {/* TAB 1: Theory Master */}
-        {activeTab === 'theory' && (
-          <div className="space-y-6 sm:space-y-8 animate-fadeIn">
-            <SectionViewer
-              sections={MONEY_AND_BANKING_SECTIONS}
-              onSpeak={speech.speak}
-              activeSpeechId={speech.activeSpeechId}
-              isSpeaking={speech.isSpeaking}
-              isPaused={speech.isPaused}
-            />
-          </div>
-        )}
-
-        {/* TAB 2: Credit Creation Simulator */}
-        {activeTab === 'simulator' && (
-          <div className="space-y-8 sm:space-y-10 animate-fadeIn">
-            <CreditCreationSimulator
-              onSpeak={speech.speak}
-              activeSpeechId={speech.activeSpeechId}
-              isSpeaking={speech.isSpeaking}
-            />
-            <MoneySupplyCalculator />
-          </div>
-        )}
-
-        {/* TAB 3: Visual Flowcharts & Architecture */}
-        {activeTab === 'visualizers' && (
-          <div className="space-y-8 sm:space-y-10 animate-fadeIn">
-            <BankingArchitecture />
-            <MonetaryPolicyTransmission />
-            <BarterVsMoneyFlow />
-          </div>
-        )}
-
-        {/* TAB 4: Numericals & Solved Step-by-Step */}
-        {activeTab === 'numericals' && (
-          <div className="space-y-8 sm:space-y-10 animate-fadeIn">
-            <NumericalSolver formulas={MONEY_AND_BANKING_FORMULAS} />
-            <MoneySupplyCalculator />
-          </div>
-        )}
-
-        {/* TAB 5: Differences (8 Comparison Tables) */}
-        {activeTab === 'differences' && (
-          <div className="space-y-6 sm:space-y-8 animate-fadeIn">
-            <DifferenceTable tables={MONEY_AND_BANKING_DIFFERENCES} />
-          </div>
-        )}
-
-        {/* TAB 6: Practice & Board Questions */}
-        {activeTab === 'practice' && (
-          <div className="space-y-6 sm:space-y-8 animate-fadeIn">
-            {/* Sub-tab switcher - mobile horizontal scrolling */}
-            <div className="flex items-center gap-1.5 p-1.5 bg-slate-900/90 rounded-2xl border border-cyan-500/30 shadow-lg overflow-x-auto scrollbar-none whitespace-nowrap">
-              <button
-                onClick={() => {
-                  playCyberClick();
-                  setPracticeSubTab('mcq');
-                }}
-                className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
-                  practiceSubTab === 'mcq'
-                    ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
-                }`}
-              >
-                20 MCQs (क्विज)
-              </button>
-              <button
-                onClick={() => {
-                  playCyberClick();
-                  setPracticeSubTab('ar');
-                }}
-                className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
-                  practiceSubTab === 'ar'
-                    ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
-                }`}
-              >
-                अभिकथन-कारण (A&R)
-              </button>
-              <button
-                onClick={() => {
-                  playCyberClick();
-                  setPracticeSubTab('case');
-                }}
-                className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
-                  practiceSubTab === 'case'
-                    ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
-                }`}
-              >
-                केस-स्टडी प्रश्न
-              </button>
-              <button
-                onClick={() => {
-                  playCyberClick();
-                  setPracticeSubTab('board');
-                }}
-                className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
-                  practiceSubTab === 'board'
-                    ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
-                }`}
-              >
-                1, 2, 3, 4, 6 Marks प्रश्न
-              </button>
+        {/* Animated Wrapper per tab */}
+        <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-3 duration-300">
+          {/* TAB 1: Theory Master */}
+          {activeTab === 'theory' && (
+            <div className="space-y-6 sm:space-y-8">
+              <SectionViewer
+                sections={MONEY_AND_BANKING_SECTIONS}
+                onSpeak={speech.speak}
+                activeSpeechId={speech.activeSpeechId}
+                isSpeaking={speech.isSpeaking}
+                isPaused={speech.isPaused}
+              />
             </div>
+          )}
 
-            {/* Sub-tab view */}
-            {practiceSubTab === 'mcq' && <MCQQuiz questions={MONEY_AND_BANKING_MCQS} />}
-            {practiceSubTab === 'ar' && (
-              <AssertionReasonQuiz questions={MONEY_AND_BANKING_ASSERTION_REASON} />
-            )}
-            {practiceSubTab === 'case' && (
-              <CaseStudyViewer caseStudies={MONEY_AND_BANKING_CASE_STUDIES} />
-            )}
-            {practiceSubTab === 'board' && (
-              <BoardQuestionsViewer questions={MONEY_AND_BANKING_BOARD_QUESTIONS} />
-            )}
-          </div>
-        )}
+          {/* TAB 2: Credit Creation Simulator */}
+          {activeTab === 'simulator' && (
+            <div className="space-y-8 sm:space-y-10">
+              <CreditCreationSimulator
+                onSpeak={speech.speak}
+                activeSpeechId={speech.activeSpeechId}
+                isSpeaking={speech.isSpeaking}
+              />
+              <MoneySupplyCalculator />
+            </div>
+          )}
 
-        {/* TAB 7: Quick Revision Notes & 3D Flashcards */}
-        {activeTab === 'revision' && (
-          <div className="space-y-8 sm:space-y-10 animate-fadeIn">
-            <QuickRevisionCards
-              relationships={REVISION_RELATIONSHIPS}
-              onSpeak={speech.speak}
-              activeSpeechId={speech.activeSpeechId}
-              isSpeaking={speech.isSpeaking}
-            />
-            <CommonMistakes />
-          </div>
-        )}
+          {/* TAB 3: Visual Flowcharts & Architecture */}
+          {activeTab === 'visualizers' && (
+            <div className="space-y-8 sm:space-y-10">
+              <BarterVsMoneyFlow />
+              <MonetaryPolicyTransmission />
+              <BankingArchitecture />
+            </div>
+          )}
 
-        {/* TAB 8: Glossary */}
-        {activeTab === 'glossary' && (
-          <div className="space-y-6 sm:space-y-8 animate-fadeIn">
-            <GlossaryViewer
-              terms={MONEY_AND_BANKING_GLOSSARY}
-              onSpeak={speech.speak}
-              activeSpeechId={speech.activeSpeechId}
-              isSpeaking={speech.isSpeaking}
-            />
-          </div>
-        )}
+          {/* TAB 4: Numericals & Solved Step-by-Step */}
+          {activeTab === 'numericals' && (
+            <div className="space-y-8 sm:space-y-10">
+              <NumericalSolver formulas={MONEY_AND_BANKING_FORMULAS} />
+              <MoneySupplyCalculator />
+            </div>
+          )}
+
+          {/* TAB 5: Differences (8 Comparison Tables) */}
+          {activeTab === 'differences' && (
+            <div className="space-y-6 sm:space-y-8">
+              <DifferenceTable tables={MONEY_AND_BANKING_DIFFERENCES} />
+            </div>
+          )}
+
+          {/* TAB 6: Practice & Board Questions */}
+          {activeTab === 'practice' && (
+            <div className="space-y-6 sm:space-y-8">
+              {/* Sub-tab switcher - mobile horizontal scrolling */}
+              <div className="flex items-center gap-1.5 p-1.5 bg-slate-900/90 rounded-2xl border border-cyan-500/30 shadow-lg overflow-x-auto scrollbar-none whitespace-nowrap">
+                <button
+                  onClick={() => {
+                    playCyberClick();
+                    setPracticeSubTab('mcq');
+                  }}
+                  className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
+                    practiceSubTab === 'mcq'
+                      ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
+                  }`}
+                >
+                  20 MCQs (क्विज)
+                </button>
+                <button
+                  onClick={() => {
+                    playCyberClick();
+                    setPracticeSubTab('ar');
+                  }}
+                  className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
+                    practiceSubTab === 'ar'
+                      ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
+                  }`}
+                >
+                  अभिकथन-कारण (A&R)
+                </button>
+                <button
+                  onClick={() => {
+                    playCyberClick();
+                    setPracticeSubTab('case');
+                  }}
+                  className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
+                    practiceSubTab === 'case'
+                      ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
+                  }`}
+                >
+                  केस-स्टडी प्रश्न
+                </button>
+                <button
+                  onClick={() => {
+                    playCyberClick();
+                    setPracticeSubTab('board');
+                  }}
+                  className={`text-xs sm:text-sm px-3.5 py-2 rounded-xl font-bold transition shrink-0 cursor-pointer ${
+                    practiceSubTab === 'board'
+                      ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-cyan-200 hover:bg-slate-800'
+                  }`}
+                >
+                  1, 2, 3, 4, 6 Marks प्रश्न
+                </button>
+              </div>
+
+              {/* Sub-tab view with smooth entrance */}
+              <div key={practiceSubTab} className="animate-in fade-in duration-200">
+                {practiceSubTab === 'mcq' && <MCQQuiz questions={MONEY_AND_BANKING_MCQS} />}
+                {practiceSubTab === 'ar' && (
+                  <AssertionReasonQuiz questions={MONEY_AND_BANKING_ASSERTION_REASON} />
+                )}
+                {practiceSubTab === 'case' && (
+                  <CaseStudyViewer caseStudies={MONEY_AND_BANKING_CASE_STUDIES} />
+                )}
+                {practiceSubTab === 'board' && (
+                  <BoardQuestionsViewer questions={MONEY_AND_BANKING_BOARD_QUESTIONS} />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 7: Quick Revision Notes & 3D Flashcards */}
+          {activeTab === 'revision' && (
+            <div className="space-y-8 sm:space-y-10">
+              <QuickRevisionCards
+                relationships={REVISION_RELATIONSHIPS}
+                onSpeak={speech.speak}
+                activeSpeechId={speech.activeSpeechId}
+                isSpeaking={speech.isSpeaking}
+              />
+              <CommonMistakes />
+            </div>
+          )}
+
+          {/* TAB 8: Glossary */}
+          {activeTab === 'glossary' && (
+            <div className="space-y-6 sm:space-y-8">
+              <GlossaryViewer
+                terms={MONEY_AND_BANKING_GLOSSARY}
+                onSpeak={speech.speak}
+                activeSpeechId={speech.activeSpeechId}
+                isSpeaking={speech.isSpeaking}
+              />
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Floating Futuristic Cyber Audio Player Widget */}
