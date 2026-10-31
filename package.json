@@ -2,6 +2,7 @@
   "name": "cbse-class12-economics-platform",
   "private": true,
   "version": "1.0.0",
+  "homepage": "https://dkbbdvk.github.io/mktar",
   "type": "module",
   "scripts": {
     "dev": "vite",
