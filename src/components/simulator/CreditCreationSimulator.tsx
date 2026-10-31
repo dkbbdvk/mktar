@@ -13,10 +13,21 @@ import {
   ArrowRight,
   Info,
   HelpCircle,
-  Sparkles
+  Sparkles,
+  Volume2
 } from 'lucide-react';
 
-export const CreditCreationSimulator: React.FC = () => {
+interface CreditCreationSimulatorProps {
+  onSpeak?: (text: string, title: string, id: string) => void;
+  activeSpeechId?: string | null;
+  isSpeaking?: boolean;
+}
+
+export const CreditCreationSimulator: React.FC<CreditCreationSimulatorProps> = ({
+  onSpeak,
+  activeSpeechId,
+  isSpeaking
+}) => {
   const [initialDeposit, setInitialDeposit] = useState<number>(1000);
   const [lrr, setLrr] = useState<number>(10);
   const [currentRoundStep, setCurrentRoundStep] = useState<number>(1);
@@ -338,6 +349,24 @@ export const CreditCreationSimulator: React.FC = () => {
               >
                 <RotateCcw className="w-3.5 h-3.5" /> रीसेट
               </button>
+
+              {onSpeak && (
+                <button
+                  onClick={() => {
+                    const speech = `साख निर्माण प्रक्रिया की संपूर्ण व्याख्या: प्रारंभिक जमा ₹${initialDeposit} रुपये और वैधानिक तरलता अनुपात LRR ${lrr} प्रतिशत होने पर, साख गुणक यानी क्रेडिट मल्टीप्लायर 1 बटा ${lrr}% यानी ${(100/lrr).toFixed(1)} आता है। इसका अर्थ है कि बैंकिंग प्रणाली इस प्रारंभिक जमा से कुल ₹${primaryResult.totalDeposits.toLocaleString('en-IN')} रुपये की कुल जमाएँ निर्मित करेगी, जिसमें से ₹${primaryResult.totalCreditCreated.toLocaleString('en-IN')} रुपये का नया ऋण सृजित होगा और ₹${primaryResult.totalReserves.toLocaleString('en-IN')} रुपये बैंक रिज़र्व में सुरक्षित रहेगा।${compareMode ? ` तुलनात्मक विश्लेषण: यदि LRR को बढ़ाकर ${comparisonLrr} प्रतिशत किया जाए, तो कुल जमा सृजन घटकर मात्र ₹${comparisonResult.totalDeposits.toLocaleString('en-IN')} रह जाएगा, क्योंकि LRR और साख सृजन में विपरीत संबंध होता है।` : ''}`;
+                    onSpeak(speech, 'साख निर्माण सिमुलेटर व्याख्या', 'sim-credit-creation');
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+                    activeSpeechId === 'sim-credit-creation' && isSpeaking
+                      ? 'bg-rose-500 text-white animate-pulse'
+                      : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
+                  }`}
+                  title="साख निर्माण की ऑडियो व्याख्या सुनें"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                  <span>{activeSpeechId === 'sim-credit-creation' && isSpeaking ? 'रोकें' : '🔊 AI व्याख्या'}</span>
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 self-center">

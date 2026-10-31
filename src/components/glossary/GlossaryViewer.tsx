@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { GlossaryTerm } from '../../types/glossary';
-import { Search, BookMarked, Filter, Hash, Sparkles } from 'lucide-react';
+import { Search, BookMarked, Filter, Hash, Sparkles, Volume2 } from 'lucide-react';
 
 interface GlossaryViewerProps {
   terms: GlossaryTerm[];
+  onSpeak?: (text: string, title: string, id: string) => void;
+  activeSpeechId?: string | null;
+  isSpeaking?: boolean;
 }
 
-export const GlossaryViewer: React.FC<GlossaryViewerProps> = ({ terms }) => {
+export const GlossaryViewer: React.FC<GlossaryViewerProps> = ({ 
+  terms,
+  onSpeak,
+  activeSpeechId,
+  isSpeaking
+}) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
@@ -85,9 +93,28 @@ export const GlossaryViewer: React.FC<GlossaryViewerProps> = ({ terms }) => {
                   <h4 className="font-heading font-bold text-base text-slate-900">
                     {term.termHi}
                   </h4>
-                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 shrink-0">
-                    {term.category}
-                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {onSpeak && (
+                      <button
+                        onClick={() => onSpeak(
+                          `${term.termHi}। अंग्रेजी में ${term.termEn}। परिभाषा: ${term.definitionHi}`,
+                          term.termHi,
+                          `glossary-${term.id}`
+                        )}
+                        className={`p-1 rounded-lg transition ${
+                          activeSpeechId === `glossary-${term.id}` && isSpeaking
+                            ? 'bg-rose-500 text-white animate-pulse'
+                            : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                        }`}
+                        title="परिभाषा सुनें"
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                      {term.category}
+                    </span>
+                  </div>
                 </div>
                 <div className="text-xs font-semibold text-slate-500 italic">
                   {term.termEn}

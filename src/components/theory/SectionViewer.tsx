@@ -16,11 +16,19 @@ import {
   TrendingUp,
   Landmark,
   Sliders,
-  Network
+  Network,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause
 } from 'lucide-react';
 
 interface SectionViewerProps {
   sections: Section[];
+  onSpeak?: (text: string, title: string, id: string) => void;
+  activeSpeechId?: string | null;
+  isSpeaking?: boolean;
+  isPaused?: boolean;
 }
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -35,7 +43,13 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Network
 };
 
-export const SectionViewer: React.FC<SectionViewerProps> = ({ sections }) => {
+export const SectionViewer: React.FC<SectionViewerProps> = ({ 
+  sections,
+  onSpeak,
+  activeSpeechId,
+  isSpeaking,
+  isPaused
+}) => {
   const [activeSectionId, setActiveSectionId] = useState<string>(sections[0]?.id || '');
   const [expandedSubsections, setExpandedSubsections] = useState<Record<string, boolean>>({
     'meaning-of-money': true,
@@ -66,6 +80,29 @@ export const SectionViewer: React.FC<SectionViewerProps> = ({ sections }) => {
       ...prev,
       [subId]: !prev[subId]
     }));
+  };
+
+  const buildSectionSpeechText = (sec: Section): string => {
+    let text = `खण्ड ${sec.number}: ${sec.titleHi}। ${sec.summaryHi}। `;
+    sec.subSections.forEach((sub, i) => {
+      text += `भाग ${i + 1}: ${sub.titleHi}। `;
+      if (sub.content.definitionHi) text += `परिभाषा: ${sub.content.definitionHi}। `;
+      if (sub.content.explanationHi) text += `${sub.content.explanationHi}। `;
+      if (sub.content.logicHi) text += `तर्क: ${sub.content.logicHi}। `;
+    });
+    return text;
+  };
+
+  const buildSubsectionSpeechText = (sub: Section['subSections'][0]): string => {
+    let text = `${sub.titleHi}। `;
+    if (sub.content.definitionHi) text += `परिभाषा: ${sub.content.definitionHi}। `;
+    if (sub.content.explanationHi) text += `${sub.content.explanationHi}। `;
+    if (sub.content.bulletPoints && sub.content.bulletPoints.length > 0) {
+      text += `मुख्य बिंदु: ${sub.content.bulletPoints.join('। ')}। `;
+    }
+    if (sub.content.logicHi) text += `अवधारणात्मक तर्क: ${sub.content.logicHi}। `;
+    if (sub.content.examImportance) text += `परीक्षा दृष्टिकोण: ${sub.content.examImportance}। `;
+    return text;
   };
 
   return (
@@ -141,10 +178,34 @@ export const SectionViewer: React.FC<SectionViewerProps> = ({ sections }) => {
       {/* Main Section Content (Right 8 cols) */}
       <div className="lg:col-span-8 space-y-4 sm:space-y-6">
         {/* Section Header Card */}
-        <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-5 sm:p-8 rounded-2xl shadow-lg space-y-2 sm:space-y-3">
-          <div className="flex items-center gap-2 text-blue-300 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-            <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span>खण्ड {activeSection.number} • NCERT Theory Master</span>
+        <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-5 sm:p-8 rounded-2xl shadow-lg space-y-3 sm:space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-blue-300 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+              <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>खण्ड {activeSection.number} • NCERT Theory Master</span>
+            </div>
+            {onSpeak && (
+              <button
+                onClick={() => onSpeak(
+                  buildSectionSpeechText(activeSection),
+                  `खण्ड ${activeSection.number}: ${activeSection.titleHi}`,
+                  `section-${activeSection.id}`
+                )}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all duration-200 cursor-pointer shadow-md ${
+                  activeSpeechId === `section-${activeSection.id}` && isSpeaking
+                    ? 'bg-rose-500 hover:bg-rose-600 text-white animate-pulse shadow-rose-500/30'
+                    : 'bg-white/10 hover:bg-white/20 text-blue-100 hover:text-white border border-white/20'
+                }`}
+                title="पूरा खण्ड ऑडियो में सुनें"
+              >
+                <Volume2 className="w-4 h-4 text-cyan-300" />
+                <span>
+                  {activeSpeechId === `section-${activeSection.id}` && isSpeaking
+                    ? (isPaused ? '▶️ वाचन जारी रखें' : '⏸️ वाचन रोकें')
+                    : '🎧 पूरा खंड सुनें (Listen All)'}
+                </span>
+              </button>
+            )}
           </div>
           <h2 className="text-xl sm:text-3xl font-extrabold font-heading leading-tight">
             {activeSection.titleHi}
@@ -161,26 +222,68 @@ export const SectionViewer: React.FC<SectionViewerProps> = ({ sections }) => {
         <div className="space-y-3 sm:space-y-5">
           {activeSection.subSections.map((sub) => {
             const isExpanded = expandedSubsections[sub.id] !== false;
+            const isSubSpeaking = activeSpeechId === sub.id && isSpeaking;
             return (
               <div
                 key={sub.id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition"
+                className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
+                  isSubSpeaking
+                    ? 'border-indigo-500 ring-2 ring-indigo-500/40 shadow-xl shadow-indigo-500/15'
+                    : 'border-slate-200 shadow-sm hover:border-slate-300'
+                }`}
               >
                 {/* Subsection Accordion Header */}
-                <button
+                <div
                   onClick={() => toggleSubsection(sub.id)}
-                  className="w-full p-4 sm:p-5 bg-slate-50/80 hover:bg-slate-100/80 transition flex items-center justify-between text-left border-b border-slate-100 gap-2"
+                  className="w-full p-4 sm:p-5 bg-slate-50/80 hover:bg-slate-100/80 transition flex items-center justify-between text-left border-b border-slate-100 gap-2 cursor-pointer"
                 >
-                  <div className="space-y-0.5">
-                    <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 leading-snug">
-                      {sub.titleHi}
-                    </h3>
-                    <div className="text-[11px] sm:text-xs text-slate-500">{sub.titleEn}</div>
+                  <div className="space-y-0.5 min-w-0 pr-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900 leading-snug">
+                        {sub.titleHi}
+                      </h3>
+                      {isSubSpeaking && (
+                        <span className="flex items-center gap-0.5 h-3 px-1.5 py-0.5 rounded-full bg-indigo-100 text-[10px] text-indigo-700 font-bold shrink-0">
+                          <span className="w-1 h-2 bg-indigo-600 rounded-full animate-bounce" />
+                          <span className="w-1 h-3 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                          <span className="w-1 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                          <span className="ml-1 hidden sm:inline">सुनाई दे रहा है</span>
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] sm:text-xs text-slate-500 truncate">{sub.titleEn}</div>
                   </div>
-                  <div className="p-1 rounded-full bg-white text-slate-600 border border-slate-200 shrink-0">
-                    {isExpanded ? <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {onSpeak && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSpeak(
+                            buildSubsectionSpeechText(sub),
+                            sub.titleHi,
+                            sub.id
+                          );
+                        }}
+                        className={`px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${
+                          isSubSpeaking
+                            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                            : 'bg-white text-indigo-700 hover:bg-indigo-50 border border-indigo-200/80'
+                        }`}
+                        title="यह विषय सुनें"
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span className="text-[11px] sm:text-xs">
+                          {isSubSpeaking ? (isPaused ? '▶️' : '⏸️') : '🔊 सुनें'}
+                        </span>
+                      </button>
+                    )}
+                    <div className="p-1 rounded-full bg-white text-slate-600 border border-slate-200 shrink-0">
+                      {isExpanded ? <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                    </div>
                   </div>
-                </button>
+                </div>
 
                 {/* Subsection Body */}
                 {isExpanded && (
